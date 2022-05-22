@@ -1,0 +1,29 @@
+# Logs
+/client-dashboard/logs
+*.log
+/client-dashboard/npm-debug.log*
+/client-dashboard/yarn-debug.log*
+/client-dashboard/yarn-error.log*
+/client-dashboard/pnpm-debug.log*
+/client-dashboard/lerna-debug.log*
+
+/client-dashboard/node_modules
+/client-dashboard/.DS_Store
+/client-dashboard/dist
+/client-dashboard/dist-ssr
+/client-dashboard/coverage
+/client-dashboard/*.local
+
+/client-dashboard/cypress/videos/
+/client-dashboard/cypress/screenshots/
+**/target
+
+# Editor directories and files
+/client-dashboard/.vscode/*
+!/client-dashboard/.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
