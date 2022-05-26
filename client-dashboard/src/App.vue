@@ -1,45 +1,101 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from "vue-router";
-import HelloWorld from "@/components/HelloWorld.vue";
+import { store } from "./main";
+const addServer = (ip: string) => {
+  if (ip.includes("http://")) {
+    return;
+  }
+  let formated = ip.replace(/$[/]/g, "").trim();
+  if (!store.state.servers.includes(formated)) {
+    console.log(formated)
+    store.state.servers.push(formated);
+    localStorage.setItem("relays", store.state.servers.join("|"));
+  }
+}
+
+const removeRelay = (ip: string) => {
+  let newData = store.state.servers.filter(c => c != ip);
+  store.state.servers = newData;
+  localStorage.setItem("relays", store.state.servers);
+}
 </script>
 
 <template>
   <header>
-    <img
-      alt="Vue logo"
-      class="logo"
-      src="@/assets/logo.svg"
-      width="125"
-      height="125"
-    />
-
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
       <nav>
         <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/details">Details</RouterLink>
+        <br>
+	      <input class="addButton" v-model="this.message" placeholder="127.0.0.1:0000" />
+        <button class="addButton" @click="addServer(this.message)">
+          add relay
+        </button>
+        <br>
+        <br>
+        <div class="text" v-if="!!store.state.servers && store.state.servers.length > 0"> Servers: </div>
+        <div class="relayList">
+          <div v-for="item in store.state.servers" :key="item">
+            <button class="minimalButton" @click="removeRelay(item)">
+              {{item}}
+            </button>
+          </div>
+        </div>
       </nav>
     </div>
+    <RouterView />
   </header>
-
-  <RouterView />
 </template>
 
 <style>
 @import "@/assets/base.css";
 
 #app {
-  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem;
-  background-color: #1E1E2C;
+  background-color: var(--color-background);
   font-weight: normal;
+  min-height: 100vh;
+}
+
+.text {
+  color: var(--vt-c-text-dark-1);
+  font-size: 16px;
+}
+
+.addButton {
+  padding: 4px;
+  margin: 4px;
+  font-family: Iosevka;
+  color: var(--vt-c-text-dark-1);
+  background-color: var(--vt-c-black-soft);
+  outline: none;
+  border: 0px solid;
+  border-radius: 3px;
+  font-size: 14px;
+}
+
+.minimalButton, .minimalButton:focus {
+  font-family: Iosevka;
+  color: var(--vt-c-black-soft);
+  outline: none;
+  background: transparent;
+  border: 0px solid;
+}
+
+.minimalButton:hover {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.5);
+  text-decoration: line-through;
+}
+
+.relayList {
+  display: flex;
 }
 
 header {
+  width: 100%;
   line-height: 1.5;
-  max-height: 100vh;
 }
 
 .logo {
@@ -47,24 +103,23 @@ header {
   margin: 0 auto 2rem;
 }
 
-a,
-.green {
+a {
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
+  margin: 8px;
+  color: var(--vt-c-white-soft);
   transition: 0.4s;
 }
 
 @media (hover: hover) {
   a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
+    background-color: var(--vt-c-divider-light-1);
   }
 }
 
 nav {
   width: 100%;
-  font-size: 12px;
+  font-size: 20px;
   text-align: center;
-  margin-top: 2rem;
 }
 
 nav a.router-link-exact-active {
@@ -77,8 +132,9 @@ nav a.router-link-exact-active:hover {
 
 nav a {
   display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+  padding: 1rem;
+  border-radius: 4px;
+  font-size: 16px;
 }
 
 nav a:first-of-type {
@@ -104,6 +160,7 @@ nav a:first-of-type {
   }
 
   header .wrapper {
+    width: 50vw;
     display: flex;
     place-items: flex-start;
     flex-wrap: wrap;

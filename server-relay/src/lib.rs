@@ -2,6 +2,9 @@ use std::{time::{SystemTime, UNIX_EPOCH}, fs};
 use reqwest::Client;
 use serde::{Serialize, Deserialize};
 use lazy_static::lazy_static;
+use std::path::PathBuf;
+use std::time::Duration;
+use serde_json::json;
 
 use actix_web::{
     get,
@@ -57,7 +60,6 @@ struct Sysinfo {
     cpu: String,
     cpu_temp: Option<f32>,
     cpus: Vec<u64>,
-    cpu_usage: u32,
     core_count: usize,
     swap_used: u64,
     swap_total: u64,
@@ -69,25 +71,92 @@ struct Sysinfo {
     load_avg: [f64; 3]
 }
 
+#[derive(Serialize, Debug, Default)]
+struct SysinfoOut {
+    timestamp: u64,
+    name: String,
+    host_name: String,
+    kernel: String,
+    cpu: String,
+    cpu_temp: Option<f32>,
+    cpus: Vec<u64>,
+    core_count: usize,
+    swap_used: u64,
+    swap_total: u64,
+    memory_used: u64,
+    memory_total: u64,
+    disks: Vec<Disk>,
+    uptime: u64,
+    net: Vec<Net>,
+    load_avg: [f64; 3]
+}
+
+impl From<Sysinfo> for SysinfoOut {
+    fn from(s: Sysinfo) -> Self {
+        Self {
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs(),
+            name: s.name,
+            host_name: s.host_name,
+            kernel: s.kernel,
+            cpu: s.cpu,
+            cpu_temp: s.cpu_temp,
+            cpus: s.cpus,
+            core_count: s.core_count,
+            swap_used: s.swap_used,
+            swap_total: s.swap_total,
+            memory_used: s.memory_used,
+            memory_total: s.memory_total,
+            disks: s.disks,
+            uptime: s.uptime,
+            net: s.net,
+            load_avg: s.load_avg
+        } 
+    }
+}
+
 #[get("/data")]
 async fn data(_: HttpRequest) -> Result<HttpResponse> {
-    let mut pings = Vec::with_capacity(CONFIG.servers.len());
+    let mut server_data = Vec::with_capacity(CONFIG.servers.len());
     let client = Client::new();
     for server in &*CONFIG.servers {
-        pings.push(match client.post(format!("http://{server}/sysinfo")).json("{}").send().await {
-            Ok(v) => format!("{{\"{server}\":{:#?}}}", v.json::<Sysinfo>().await.unwrap_or_default()),
+        server_data.push(match client.post(format!("http://{server}/sysinfo")).json("{}").send().await {
+            Ok(v) => {
+                let data: SysinfoOut = v.json::<Sysinfo>().await.unwrap_or_default().into();
+                json!(data).to_string()
+            },
             Err(_) => continue
         });
     }
     Ok(HttpResponse::build(StatusCode::OK)
         .content_type(ContentType::plaintext())
-        .body(format!("[{}]", pings.join(","))))
+        .body(format!("[{}]", server_data.join(","))))
 }
 
+#[get("/data_all")]
+async fn data_all(_: HttpRequest) -> Result<HttpResponse> {
+    if !PathBuf::from("./server_data.json").exists() {
+        let _ = fs::File::create("./server_data.json");
+        return Ok(HttpResponse::build(StatusCode::OK)
+            .content_type(ContentType::plaintext())
+            .body("[]"))
+    }
+    let all_data = fs::read_to_string("./server_data.json").unwrap_or_else(|_| "[]".into());
+    Ok(HttpResponse::build(StatusCode::OK)
+        .content_type(ContentType::plaintext())
+        .body(all_data))
+}
+
+
 pub async fn run<S: AsRef<str>>(_args: &[S]) -> anyhow::Result<()> {
+    tokio::spawn(async move {
+        loop {
+            tokio::time::sleep(Duration::from_secs(5)).await;
+        }
+    });
     HttpServer::new(|| {
         App::new()
             .service(data)
+            .service(data_all)
             .service(ping)
             .service(ping_all)
     })

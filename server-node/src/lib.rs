@@ -37,7 +37,6 @@ struct Sysinfo {
     cpu: String,
     cpu_temp: Option<f32>,
     cpus: Vec<u64>,
-    cpu_usage: u32,
     core_count: usize,
     swap_used: u64,
     swap_total: u64,
@@ -50,23 +49,20 @@ struct Sysinfo {
 }
 
 impl Sysinfo {
-    pub fn new(sys: &System) -> Self {
+    pub fn new(sys: &mut System) -> Self {
+        sys.refresh_cpu();
         let mut cpu = String::with_capacity(15);
         let core_count = sys.processors().len();
         let mut first = true;
-        let mut total_usage = 0.0;
         let mut cpus = Vec::with_capacity(core_count);
+        sys.refresh_cpu();
         for core in sys.processors() {
             cpus.push(core.frequency());
             if first {
-                total_usage = core.cpu_usage();
                 cpu = core.brand().to_string();
                 first = false;
             }
         }
-
-        // between 0..10000 * core_count, this is so we can have 2 decimal rounding
-        let cpu_usage = (total_usage * 100.0) as u32 / core_count as u32;
 
         let components = sys.components();
         let cpu_temp = match components.len() {
@@ -114,7 +110,6 @@ impl Sysinfo {
             cpu,
             cpu_temp,
             cpus,
-            cpu_usage,
             core_count,
             swap_used: sys.used_swap(),
             swap_total: sys.total_swap(),
@@ -151,7 +146,7 @@ async fn handle_ping(_: Request<()>) -> tide::Result {
 async fn handle_sysinfo(_: Request<()>) -> tide::Result {
     let mut sys = System::new_all();
     sys.refresh_all();
-    Ok(json!(Sysinfo::new(&sys)).into())
+    Ok(json!(Sysinfo::new(&mut sys)).into())
 }
 
 async fn handle_update(_: Request<()>) -> tide::Result {
