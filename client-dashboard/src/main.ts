@@ -16,6 +16,8 @@ export const store = createStore({
       enabled: true,
       items: [],
       unix: Date.now() / 1000,
+      status: [],
+      loadAverageChart: [],
     },
     plugins: [createPersistedState()],
   });

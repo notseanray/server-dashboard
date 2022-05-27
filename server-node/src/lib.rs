@@ -128,7 +128,7 @@ pub async fn run<S: AsRef<str>>(_args: &[S]) -> anyhow::Result<()> {
     app.at("/ping").post(handle_ping);
     app.at("/sysinfo").post(handle_sysinfo);
     app.at("/update").post(handle_update);
-    app.listen("127.0.0.1:4321").await?;
+    app.listen("0.0.0.0:4321").await?;
     Ok(())
 }
 

@@ -19,5 +19,4 @@ serde_json = "1.0.81"
 profile-rustflags = [
 	"-C", "link-arg=-fuse-ld=lld"
 ]
-strip = true
 panic = "abort"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from "vue-router";
 import { store } from "./main";
+import BarChart from "./components/Graph.vue";
 const addServer = (ip: string) => {
   if (ip.includes("http://")) {
     return;
@@ -24,6 +24,7 @@ const removeRelay = (ip: string) => {
   <header>
     <div class="wrapper">
       <nav>
+        <BarChart />
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/details">Details</RouterLink>
         <br>
@@ -174,7 +175,7 @@ nav a:first-of-type {
     text-align: left;
     margin-left: -1rem;
     font-size: 1rem;
-
+    width: 100vw;
     padding: 1rem 0;
     margin-top: 1rem;
   }

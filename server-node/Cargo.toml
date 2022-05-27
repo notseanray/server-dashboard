@@ -17,5 +17,4 @@ sysinfo = "0.23.13"
 profile-rustflags = [
 	"-C", "link-arg=-fuse-ld=lld"
 ]
-strip = true
 panic = "abort"

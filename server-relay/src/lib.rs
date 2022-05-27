@@ -2,9 +2,11 @@ use std::{time::{SystemTime, UNIX_EPOCH}, fs};
 use reqwest::Client;
 use serde::{Serialize, Deserialize};
 use lazy_static::lazy_static;
-use std::path::PathBuf;
 use std::time::Duration;
 use serde_json::json;
+use std::collections::VecDeque;
+use tokio::sync::Mutex;
+use std::sync::Arc;
 
 use actix_web::{
     get,
@@ -29,9 +31,10 @@ impl Config {
 
 lazy_static! {
     static ref CONFIG: Config = Config::load();
+    static ref DATA: Arc<Mutex<VecDeque<SysinfoOut>>> = Arc::new(Mutex::new(VecDeque::with_capacity(CONFIG.servers.len() * 720)));
 }
 
-#[derive(Serialize, Debug, Default, Deserialize)]
+#[derive(Serialize, Debug, Default, Deserialize, Clone)]
 struct Disk {
     name: String,
     fs_type: String,
@@ -41,7 +44,7 @@ struct Disk {
     removable: bool
 }
 
-#[derive(Serialize, Debug, Default, Deserialize)]
+#[derive(Serialize, Debug, Default, Deserialize, Clone)]
 struct Net {
     if_name: String,
     rx: u64,
@@ -71,8 +74,9 @@ struct Sysinfo {
     load_avg: [f64; 3]
 }
 
-#[derive(Serialize, Debug, Default)]
+#[derive(Serialize, Debug, Default, Clone)]
 struct SysinfoOut {
+    ip: String,
     timestamp: u64,
     name: String,
     host_name: String,
@@ -91,65 +95,66 @@ struct SysinfoOut {
     load_avg: [f64; 3]
 }
 
-impl From<Sysinfo> for SysinfoOut {
-    fn from(s: Sysinfo) -> Self {
-        Self {
-            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs(),
-            name: s.name,
-            host_name: s.host_name,
-            kernel: s.kernel,
-            cpu: s.cpu,
-            cpu_temp: s.cpu_temp,
-            cpus: s.cpus,
-            core_count: s.core_count,
-            swap_used: s.swap_used,
-            swap_total: s.swap_total,
-            memory_used: s.memory_used,
-            memory_total: s.memory_total,
-            disks: s.disks,
-            uptime: s.uptime,
-            net: s.net,
-            load_avg: s.load_avg
-        } 
-    }
+macro_rules! time {
+    () => {
+        SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs()
+    };
+}
+
+fn format_response(s: Sysinfo, ip: String) -> SysinfoOut {
+    SysinfoOut {
+        ip,
+        timestamp: time!(),
+        name: s.name,
+        host_name: s.host_name,
+        kernel: s.kernel,
+        cpu: s.cpu,
+        cpu_temp: s.cpu_temp,
+        cpus: s.cpus,
+        core_count: s.core_count,
+        swap_used: s.swap_used,
+        swap_total: s.swap_total,
+        memory_used: s.memory_used,
+        memory_total: s.memory_total,
+        disks: s.disks,
+        uptime: s.uptime,
+        net: s.net,
+        load_avg: s.load_avg
+    } 
 }
 
 #[get("/data")]
 async fn data(_: HttpRequest) -> Result<HttpResponse> {
-    let mut server_data = Vec::with_capacity(CONFIG.servers.len());
-    let client = Client::new();
-    for server in &*CONFIG.servers {
-        server_data.push(match client.post(format!("http://{server}/sysinfo")).json("{}").send().await {
-            Ok(v) => {
-                let data: SysinfoOut = v.json::<Sysinfo>().await.unwrap_or_default().into();
-                json!(data).to_string()
-            },
-            Err(_) => continue
-        });
+    let mut server_data: Vec<SysinfoOut> = Vec::with_capacity(CONFIG.servers.len());
+    for server in &*DATA.lock().await {
+        if server.timestamp + 6 > time!() {
+            server_data.push(server.clone());
+        }
     }
     Ok(HttpResponse::build(StatusCode::OK)
         .content_type(ContentType::plaintext())
-        .body(format!("[{}]", server_data.join(","))))
+        .body(json!(server_data).to_string()))
 }
 
 #[get("/data_all")]
 async fn data_all(_: HttpRequest) -> Result<HttpResponse> {
-    if !PathBuf::from("./server_data.json").exists() {
-        let _ = fs::File::create("./server_data.json");
-        return Ok(HttpResponse::build(StatusCode::OK)
-            .content_type(ContentType::plaintext())
-            .body("[]"))
-    }
-    let all_data = fs::read_to_string("./server_data.json").unwrap_or_else(|_| "[]".into());
     Ok(HttpResponse::build(StatusCode::OK)
         .content_type(ContentType::plaintext())
-        .body(all_data))
+        .body(json!(*DATA.lock().await).to_string()))
 }
 
 
 pub async fn run<S: AsRef<str>>(_args: &[S]) -> anyhow::Result<()> {
     tokio::spawn(async move {
+        let client = Client::new();
         loop {
+            for server in &*CONFIG.servers {
+                DATA.lock().await.push_back(match client.post(format!("http://{server}/sysinfo")).json("{}").send().await {
+                    Ok(v) => format_response(v.json::<Sysinfo>().await.unwrap_or_default(), server.to_owned()),
+                    Err(_) => continue
+                });
+            }
+            DATA.lock().await.retain(|x| x.timestamp + 3600 > time!());
             tokio::time::sleep(Duration::from_secs(5)).await;
         }
     });
@@ -160,7 +165,7 @@ pub async fn run<S: AsRef<str>>(_args: &[S]) -> anyhow::Result<()> {
             .service(ping)
             .service(ping_all)
     })
-    .bind(("127.0.0.1", 4500))?
+    .bind(("0.0.0.0", 4500))?
     .workers(3)
     .run()
     .await?;
