@@ -127,7 +127,7 @@ fn format_response(s: Sysinfo, ip: String) -> SysinfoOut {
 async fn data(_: HttpRequest) -> Result<HttpResponse> {
     let mut server_data: Vec<SysinfoOut> = Vec::with_capacity(CONFIG.servers.len());
     for server in &*DATA.lock().await {
-        if server.timestamp + 6 > time!() {
+        if server.timestamp + 10 > time!() {
             server_data.push(server.clone());
         }
     }
@@ -155,7 +155,7 @@ pub async fn run<S: AsRef<str>>(_args: &[S]) -> anyhow::Result<()> {
                 });
             }
             DATA.lock().await.retain(|x| x.timestamp + 3600 > time!());
-            tokio::time::sleep(Duration::from_secs(5)).await;
+            tokio::time::sleep(Duration::from_secs(10)).await;
         }
     });
     HttpServer::new(|| {

@@ -14,7 +14,7 @@ defineProps({
   kernel: String,
   disks: Array,
   cpu: String,
-  cpu_temp: Number,
+  cpu_temp: null,
   load_avg: Array,
   net: Array,
   core_count: Number,
@@ -63,11 +63,20 @@ const displayPackets = (ptx: Number, prx: Number, uptime: Number): String => {
 }
 
 const formatCpu = (cpuName: String): String => {
-  if (cpuName.length > 30) {
-    return `${cpuName.slice(0, 30)}...`;
+  let newName = cpuName.replace("AMD ", "").replace("Intel", "").replace("(R)", "").replace("(TM)", "").replace("CPU", "");
+  if (newName.length > 30) {
+    return `${newName.slice(0, 30)}...`;
   }
-  return cpuName;
+  return newName;
 }
+
+const cpuTemp = (temp: number | null): number => {
+  if (!temp) {
+    return 0;
+  }
+  return temp.toFixed(1);
+}
+
 </script>
 
 <template>
@@ -79,7 +88,7 @@ const formatCpu = (cpuName: String): String => {
       <br>
       cpu: <div style="float: right"> {{formatCpu(this.cpu)}} ({{this.core_count}}) </div>
       <br>
-      load avg: {{loadAvgs(this.load_avg)}} <div style="float: right">cpu temp: {{this.cpu_temp.toFixed(1)}} °C </div>
+      load avg: {{loadAvgs(this.load_avg)}} <div style="float: right">cpu temp: {{cpuTemp(this.cpu_temp)}} °C </div>
       <br>
       ram: <div style="float: right"> {{makeMB(this.memory_used)}} MiB / {{makeMB(this.memory_total)}} MiB </div>
       <br>
@@ -89,7 +98,7 @@ const formatCpu = (cpuName: String): String => {
       <br>
       disks: 
       <div class="diskBox">
-        <div v-for="item in this.disks" :key="item">
+        <div v-for="item in this.disks.filter(x => x.total_space > 10332160000 && !(x.mnt_point.includes('docker')))" :key="item">
           <div class="disk">
             {{item.name}} [{{item.fs_type}}] 
             <br>
@@ -103,7 +112,7 @@ const formatCpu = (cpuName: String): String => {
       </div>
       net:
       <div class="diskBox">
-        <div v-for="item in this.net" :key="item">
+        <div v-for="item in this.net.filter(x => x.tx > 10000)" :key="item">
           <div class="disk">
             {{item.if_name}}
             <br>
@@ -121,53 +130,19 @@ const formatCpu = (cpuName: String): String => {
 
 <style scoped>
 .item {
+  display: inline-block;
   margin: 4px;
+  max-width: 350px;
   background-color: var(--vt-c-black-soft);
-}
-
-h3 {
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin-bottom: 0.4rem;
-  color: var(--color-heading);
-}
-.diskBox {
-  margin-top: 8px;
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-around;
-}
-.serverBox > div {
-   flex-basis: 50%;
-}
-.disk {
-  padding: 4px;
-  flex: 1 0 30%;
-  border: 1px solid;
-  border-radius: 4px;
-}
-.item {
   box-shadow: 0 7px 12px 0 rgba(0,0,0,0.4);
   transition: 0.3s;
   border-radius: 4px;
   margin: 10px;
   padding: 10px;
-  min-width: 22vw;
-}
-.item:hover {
-  box-shadow: 0 10px 16px 0 rgba(0,0,0,0.5);
 }
 
-i {
-  transition: 0.4s;
-  top: calc(50% - 25px);
-  left: -26px;
-  position: absolute;
-  border: 1px solid var(--color-border);
-  background: var(--color-background);
-  border-radius: 8px;
-  width: 50px;
-  height: 50px;
+.item:hover {
+  box-shadow: 0 10px 16px 0 rgba(0,0,0,0.5);
 }
 
 .item:before {
@@ -180,6 +155,8 @@ i {
 }
 
 .item:after {
+  display: inline-block;
+  font-size: 11px;
   content: " ";
   border-left: 1px solid var(--color-border);
   position: absolute;
@@ -188,11 +165,20 @@ i {
   height: calc(50% - 25px);
 }
 
-.item:first-of-type:before {
-  display: none;
+h3 {
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  color: var(--color-heading);
 }
-
-.item:last-of-type:after {
-  display: none;
+.diskBox {
+  max-width: 400px;
+  margin-top: 8px;
+}
+.disk {
+  padding: 4px;
+  max-width: 120px;
+  display: inline-block;
+  border: 1px solid;
+  border-radius: 4px;
 }
 </style>

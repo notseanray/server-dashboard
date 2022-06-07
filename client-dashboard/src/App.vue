@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { store } from "./main";
-import BarChart from "./components/Graph.vue";
+import LAGraph from "./components/LAGraph.vue";
+import TGraph from "./components/TGraph.vue";
+import RamGraph from "./components/RamGraph.vue";
 const addServer = (ip: string) => {
   if (ip.includes("http://")) {
     return;
@@ -24,7 +26,11 @@ const removeRelay = (ip: string) => {
   <header>
     <div class="wrapper">
       <nav>
-        <BarChart />
+        <div class="graphPane">
+            <LAGraph />
+            <TGraph />
+            <RamGraph />
+        </div>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/details">Details</RouterLink>
         <br>
@@ -34,7 +40,7 @@ const removeRelay = (ip: string) => {
         </button>
         <br>
         <br>
-        <div class="text" v-if="!!store.state.servers && store.state.servers.length > 0"> Servers: </div>
+        <div class="text" v-if="!!store.state.servers && store.state.servers.length > 0"> Relays: </div>
         <div class="relayList">
           <div v-for="item in store.state.servers" :key="item">
             <button class="minimalButton" @click="removeRelay(item)">
@@ -58,6 +64,10 @@ const removeRelay = (ip: string) => {
   background-color: var(--color-background);
   font-weight: normal;
   min-height: 100vh;
+}
+
+.graphPane {
+  width: 48vw;
 }
 
 .text {
