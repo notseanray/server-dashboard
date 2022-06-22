@@ -58,7 +58,6 @@ let chartData = ref<ChartData<'line'>>({
 setInterval(() => {
 	let dataOneMinute = [];
     let length = 0;
-	// console.log(store.state.loadAverageChartOne)
 	for (const d of store.state.loadAverageChartOne) {
         if (length == 0) {
             length = d.data.length;
@@ -91,7 +90,7 @@ setInterval(() => {
 }, 10000);
 
 setInterval(() => {
-    if (!store.state.loadAverageChartOne || !store.state.loadAverageChartOne[0].data) {
+    if (!!store.state.loadAverageChartOne || !!store.state.loadAverageChartOne[0].data) {
         return;
     }
     for (const d of store.state.loadAverageChartOne) {

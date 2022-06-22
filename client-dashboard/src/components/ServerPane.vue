@@ -36,9 +36,9 @@ const getList = () => {
                 .then((response: { data: any }) => {
                     for (let i = 0; i < response.data.length; i++) {
                         let r = response.data[i];
-                        let assign = find(ip + "|" + r.ip);
+                        const label = ip + "|" + r.ip;
+                        let assign = find(label);
                         if (assign < 0) {
-                            const label = ip + "|" + r.ip;
                             oneMinute.push({
                                 ip: label,
                                 data: [],
@@ -139,26 +139,43 @@ setInterval(() => {
     for (const dp of temperatureGraph) {
         store.state.TemperatureChart[dp.index].data.push(dp.dp);
     }
-    temperatureGraph.length = 0;
+    // temperatureGraph.length = 0;
 }, 10000);
+
+// setInterval(() => {
+//     if (trigger) {
+//         return;
+//     }
+//     for (const dp of updateList) {
+//         store.state.loadAverageChartOne[dp.index].data.push(dp.dp);
+//     }
+//     updateList.length = 0;
+    
+// }, 10000);
+
+// setInterval(() => {
+//     if (trigger) {
+//         return;
+//     }
+    
+//     for (const dp of updateList5) {
+//         store.state.loadAverageChartFive[dp.index].data.push(dp.dp);
+//     }
+//     updateList5.length = 0;
+    
+// }, 10000);
 
 setInterval(() => {
     if (trigger) {
         return;
     }
-    for (const dp of updateList) {
-        store.state.loadAverageChartOne[dp.index].data.push(dp.dp);
-    }
-    updateList.length = 0;
-    for (const dp of updateList5) {
-        store.state.loadAverageChartFive[dp.index].data.push(dp.dp);
-    }
-    updateList5.length = 0;
+    
     for (const dp of updateList15) {
         store.state.loadAverageChartFifteen[dp.index].data.push(dp.dp);
     }
     updateList15.length = 0;
 }, 10000);
+
 const load = () => {
     let oneMinute: any[] = [];
     let fiveMinute: any[] = [];
@@ -172,9 +189,9 @@ const load = () => {
             .then((response: { data: any }) => {
                 for (let i = 0; i < response.data.length; i++) {
                     let r = response.data[i];
-                    let assign = find(ip + "|" + r.ip);
+                    const label = ip + "|" + r.ip;
+                    let assign = find(label);
                     if (assign < 0) {
-                        const label = ip + "|" + r.ip;
                         oneMinute.push({
                             ip: label,
                             data: [],
