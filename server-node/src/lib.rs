@@ -74,13 +74,13 @@ impl Sysinfo {
 
         for disk in sys.disks() {
             let total_space = disk.total_space();
-            disks.push(Disk { 
-                name: disk.name().to_string_lossy().to_string(), 
-                fs_type: String::from_utf8(disk.file_system().to_vec()).unwrap_or_default(), 
-                mnt_point: disk.mount_point().to_string_lossy().to_string(), 
-                used_space: total_space - disk.available_space(), 
-                total_space, 
-                removable: disk.is_removable() 
+            disks.push(Disk {
+                name: disk.name().to_string_lossy().to_string(),
+                fs_type: String::from_utf8(disk.file_system().to_vec()).unwrap_or_default(),
+                mnt_point: disk.mount_point().to_string_lossy().to_string(),
+                used_space: total_space - disk.available_space(),
+                total_space,
+                removable: disk.is_removable()
             })
         }
 
@@ -132,9 +132,9 @@ pub async fn run<S: AsRef<str>>(_args: &[S]) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn handle_ping(_: Request<()>) -> tide::Result {    
+async fn handle_ping(_: Request<()>) -> tide::Result {
     Ok(format!(
-        "{{\"ping\":{}}}", 
+        "{{\"ping\":{}}}",
         SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()

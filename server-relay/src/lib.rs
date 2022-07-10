@@ -120,7 +120,7 @@ fn format_response(s: Sysinfo, ip: String) -> SysinfoOut {
         uptime: s.uptime,
         net: s.net,
         load_avg: s.load_avg
-    } 
+    }
 }
 
 #[get("/data")]
@@ -173,10 +173,10 @@ pub async fn run<S: AsRef<str>>(_args: &[S]) -> anyhow::Result<()> {
 }
 
 #[get("/ping")]
-async fn ping(_: HttpRequest) -> Result<HttpResponse> {    
+async fn ping(_: HttpRequest) -> Result<HttpResponse> {
     Ok(HttpResponse::build(StatusCode::OK)
         .content_type(ContentType::plaintext())
-        .body(format!("{{\"ping\":{}}}",         
+        .body(format!("{{\"ping\":{}}}",
             SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap_or_default()
@@ -189,11 +189,11 @@ struct Ping {
 }
 
 #[get("/ping_all")]
-async fn ping_all(_: HttpRequest) -> Result<HttpResponse> {    
+async fn ping_all(_: HttpRequest) -> Result<HttpResponse> {
     let mut pings = Vec::with_capacity(CONFIG.servers.len());
     let client = Client::new();
     for server in &*CONFIG.servers {
-        pings.push(match client.post(format!("http://{server}/ping")).json("{}").send().await {
+        pings.push(match client.post(format!("http://{server}/ping")).timeout(Duration::from_secs(3)).json("{}").send().await {
             Ok(v) => format!("{{\"{server}\":{:#?}}}", v.json::<Ping>().await.unwrap_or_default().ping),
             Err(_) => continue
         });
