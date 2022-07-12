@@ -1,5 +1,5 @@
-use std::env;
 use server_node::*;
+use std::env;
 
 #[async_std::main]
 async fn main() -> anyhow::Result<()> {
@@ -8,4 +8,3 @@ async fn main() -> anyhow::Result<()> {
     run(&args).await?;
     Ok(())
 }
-

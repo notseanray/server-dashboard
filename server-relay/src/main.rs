@@ -1,5 +1,5 @@
-use std::env;
 use server_relay::*;
+use std::env;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

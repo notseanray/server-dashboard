@@ -1,11 +1,11 @@
-use std::time::{SystemTime, UNIX_EPOCH};
 use serde::Serialize;
-use sysinfo::{System, SystemExt, ProcessorExt, ComponentExt, DiskExt, NetworkExt};
-use tide::{Request, convert::json};
+use std::time::{SystemTime, UNIX_EPOCH};
+use sysinfo::{ComponentExt, DiskExt, NetworkExt, ProcessorExt, System, SystemExt};
+use tide::{convert::json, Request};
 
 #[derive(Serialize)]
 struct Ping {
-    pub ping: u64
+    pub ping: u64,
 }
 
 #[derive(Serialize)]
@@ -15,7 +15,7 @@ struct Disk {
     mnt_point: String,
     used_space: u64,
     total_space: u64,
-    removable: bool
+    removable: bool,
 }
 
 #[derive(Serialize)]
@@ -26,7 +26,7 @@ struct Net {
     erx: u64,
     etx: u64,
     prx: u64,
-    ptx: u64
+    ptx: u64,
 }
 
 #[derive(Serialize)]
@@ -45,7 +45,7 @@ struct Sysinfo {
     disks: Vec<Disk>,
     uptime: u64,
     net: Vec<Net>,
-    load_avg: [f64; 3]
+    load_avg: [f64; 3],
 }
 
 impl Sysinfo {
@@ -67,7 +67,7 @@ impl Sysinfo {
         let components = sys.components();
         let cpu_temp = match components.len() {
             1.. => Some(components[0].temperature()),
-            _ => None
+            _ => None,
         };
 
         let mut disks = Vec::with_capacity(sys.disks().len());
@@ -80,7 +80,7 @@ impl Sysinfo {
                 mnt_point: disk.mount_point().to_string_lossy().to_string(),
                 used_space: total_space - disk.available_space(),
                 total_space,
-                removable: disk.is_removable()
+                removable: disk.is_removable(),
             })
         }
 
@@ -99,7 +99,7 @@ impl Sysinfo {
                 erx: data.errors_on_received(),
                 etx: data.errors_on_transmitted(),
                 prx: data.total_packets_received(),
-                ptx: data.total_packets_transmitted()
+                ptx: data.total_packets_transmitted(),
             });
         }
 
@@ -118,7 +118,11 @@ impl Sysinfo {
             disks,
             uptime: sys.uptime(),
             net,
-            load_avg: [sys.load_average().one, sys.load_average().five, sys.load_average().fifteen]
+            load_avg: [
+                sys.load_average().one,
+                sys.load_average().five,
+                sys.load_average().fifteen,
+            ],
         }
     }
 }
@@ -139,7 +143,7 @@ async fn handle_ping(_: Request<()>) -> tide::Result {
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
             .as_millis()
-            )
+    )
     .into())
 }
 
