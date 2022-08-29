@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { defineComponent, ref } from "vue";
-import { store, stringToColor, generateRange, defaultChartOptions, shortenLabel } from "../main";
+import {
+    store,
+    stringToColor,
+    generateRange,
+    defaultChartOptions,
+    shortenLabel,
+} from "../main";
 import { Line } from "vue-chartjs";
 import {
     Chart as ChartJS,
@@ -22,7 +28,7 @@ ChartJS.register(
     LineElement,
     LinearScale,
     PointElement,
-    CategoryScale,
+    CategoryScale
 );
 
 defineProps({
@@ -47,31 +53,31 @@ defineProps({
         default: () => {},
     },
     plugins: {
-      type: Array as PropType<Plugin<'line'>[]>,
-      default: () => []
-    }
+        type: Array as PropType<Plugin<"line">[]>,
+        default: () => [],
+    },
 });
-let chartData = ref<ChartData<'line'>>({
-	datasets: []
+let chartData = ref<ChartData<"line">>({
+    datasets: [],
 });
 
 setInterval(() => {
-	let data = [];
+    let data = [];
     let length = 0;
-	for (const d of store.state.RamChart) {
+    for (const d of store.state.RamChart) {
         if (length == 0) {
             length = d.data.length;
         }
-		data.push({
-			label: shortenLabel(d.ip) + " ram",
-			backgroundColor: stringToColor(d.ip),
-			data: d.data,
-		})
-	}
-	chartData.value = { 
+        data.push({
+            label: shortenLabel(d.ip) + " ram",
+            backgroundColor: stringToColor(d.ip),
+            data: d.data,
+        });
+    }
+    chartData.value = {
         labels: generateRange(length),
-		datasets: data
-	};
+        datasets: data,
+    };
 }, 10000);
 </script>
 

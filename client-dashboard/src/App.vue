@@ -9,7 +9,6 @@ const addServer = (ip: string) => {
   }
   let formated = ip.replace(/$[/]/g, "").trim();
   if (!store.state.servers.includes(formated)) {
-    console.log(formated)
     store.state.servers.push(formated);
     localStorage.setItem("relays", store.state.servers.join("|"));
   }
@@ -67,7 +66,7 @@ const removeRelay = (ip: string) => {
 }
 
 .graphPane {
-  width: 48vw;
+  width: 45vw;
 }
 
 .text {
@@ -171,7 +170,7 @@ nav a:first-of-type {
   }
 
   header .wrapper {
-    width: 50vw;
+    width: 45vw;
     display: flex;
     place-items: flex-start;
     flex-wrap: wrap;

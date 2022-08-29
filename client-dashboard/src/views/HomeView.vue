@@ -9,10 +9,8 @@ import ServerPane from "@/components/ServerPane.vue";
 </template>
 
 <style>
-@media (min-width: 1024px) {
-  .home {
-    min-height: 100vh;
-    align-items: center;
-  }
+.home {
+	align-items: center;
+	width: 53vw;
 }
 </style>

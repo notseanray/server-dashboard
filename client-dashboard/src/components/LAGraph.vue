@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { defineComponent, ref } from "vue";
-import { generateRange, store, stringToColorWithField, defaultChartOptions, shortenLabel } from "../main";
+import { ref } from "vue";
+import {
+    generateRange,
+    store,
+    stringToColorWithField,
+    defaultChartOptions,
+    shortenLabel,
+} from "../main";
 import { Line } from "vue-chartjs";
 import {
     Chart as ChartJS,
@@ -22,7 +28,7 @@ ChartJS.register(
     LineElement,
     LinearScale,
     PointElement,
-    CategoryScale,
+    CategoryScale
 );
 
 defineProps({
@@ -47,50 +53,52 @@ defineProps({
         default: () => {},
     },
     plugins: {
-      type: Array as PropType<Plugin<'line'>[]>,
-      default: () => []
-    }
+        type: Array as PropType<Plugin<"line">[]>,
+        default: () => [],
+    },
 });
-let chartData = ref<ChartData<'line'>>({
-	datasets: []
+let chartData = ref<ChartData<"line">>({
+    datasets: [],
 });
 
 setInterval(() => {
-	let dataOneMinute = [];
-    let length = 0;
-	for (const d of store.state.loadAverageChartOne) {
-        if (length == 0) {
-            length = d.data.length;
-        }
-		dataOneMinute.push({
-			label: shortenLabel(d.ip) + " 1",
-			backgroundColor: stringToColorWithField(d.ip, 1),
-			data: d.data,
-		})
-	}
-	for (const d of store.state.loadAverageChartFive) {
-		dataOneMinute.push({
-			label: shortenLabel(d.ip) + " 5",
-			backgroundColor: stringToColorWithField(d.ip, 3),
-			data: d.data,
-		})
-	}
-	for (const d of store.state.loadAverageChartFifteen) {
-		dataOneMinute.push({
-			label: shortenLabel(d.ip) + " 15",
-			backgroundColor: stringToColorWithField(d.ip, 6),
-			data: d.data,
-		})
-	}
+    let dataOneMinute = [];
+    let length = 352;
+	const data = JSON.parse(JSON.stringify(store.state.loadAverageChartOne));
+    for (let i = 0; i < data.length; i++) {
+		const d = data[i];
+        dataOneMinute.push({
+            label: shortenLabel(d.ip) + " 1",
+            backgroundColor: stringToColorWithField(d.ip, 1),
+            data: d.data,
+        });
+    }
+    for (const d of JSON.parse(JSON.stringify(store.state.loadAverageChartFive))) {
+        dataOneMinute.push({
+            label: shortenLabel(d.ip) + " 5",
+            backgroundColor: stringToColorWithField(d.ip, 3),
+            data: d.data,
+        });
+    }
+    for (const d of JSON.parse(JSON.stringify(store.state.loadAverageChartFifteen))) {
+        dataOneMinute.push({
+            label: shortenLabel(d.ip) + " 15",
+            backgroundColor: stringToColorWithField(d.ip, 6),
+            data: d.data,
+        });
+    }
 
-	chartData.value = { 
+    chartData.value = {
         labels: generateRange(length),
-		datasets: dataOneMinute
-	};
+        datasets: dataOneMinute,
+    };
 }, 10000);
 
 setInterval(() => {
-    if (!!store.state.loadAverageChartOne || !!store.state.loadAverageChartOne[0].data) {
+    if (
+        !!store.state.loadAverageChartOne ||
+        !!store.state.loadAverageChartOne[0].data
+    ) {
         return;
     }
     for (const d of store.state.loadAverageChartOne) {
@@ -101,7 +109,7 @@ setInterval(() => {
                 first = false;
                 continue;
             }
-            newOne.push(dp)         
+            newOne.push(dp);
         }
         d.data = newOne;
     }
@@ -113,7 +121,7 @@ setInterval(() => {
                 first = false;
                 continue;
             }
-            newOne.push(dp)         
+            newOne.push(dp);
         }
         d.data = newOne;
     }
@@ -125,7 +133,7 @@ setInterval(() => {
                 first = false;
                 continue;
             }
-            newOne.push(dp)         
+            newOne.push(dp);
         }
         d.data = newOne;
     }
