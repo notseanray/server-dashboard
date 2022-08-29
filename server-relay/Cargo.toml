@@ -9,6 +9,7 @@ authors = ["Sean Ray <seanray410@gmail.com>"]
 [dependencies]
 tokio = { version = "1.18.2", features = ["macros", "rt-multi-thread"] }
 actix-web = "4.0.1"
+actix-cors = "0.6.1"
 reqwest = { version = "0.11.10", features = ["json"] }
 serde = { version = "1.0.137", features = ["serde_derive"] }
 anyhow = "1.0.57"

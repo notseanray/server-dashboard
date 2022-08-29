@@ -10,6 +10,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 use tokio::sync::Mutex;
+use actix_cors::Cors;
 
 use actix_web::{
     get,
@@ -173,7 +174,9 @@ pub async fn run<S: AsRef<str>>(_args: &[S]) -> anyhow::Result<()> {
         }
     });
     HttpServer::new(|| {
+        let cors = Cors::permissive();
         App::new()
+            .wrap(cors)
             .service(data)
             .service(data_all)
             .service(ping)
