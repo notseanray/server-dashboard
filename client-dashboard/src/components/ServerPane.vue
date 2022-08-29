@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @ts-nocheck
 import ServerItem from "./ServerItem.vue";
 import { store } from "../main";
 import { inject } from "vue";
@@ -147,18 +148,23 @@ setInterval(() => {
         return;
     }
     for (const dp of temperatureGraph) {
+		// @ts-expect-error
         store.state.TemperatureChart[dp.index].data.push(dp.dp);
     }
     for (const dp of updateList) {
+		// @ts-expect-error
         store.state.loadAverageChartOne[dp.index].data.push(dp.dp);
     }
     for (const dp of updateList5) {
+		// @ts-expect-error
         store.state.loadAverageChartFive[dp.index].data.push(dp.dp);
     }
     for (const dp of updateList15) {
+		// @ts-expect-error
         store.state.loadAverageChartFifteen[dp.index].data.push(dp.dp);
     }
     for (const dp of ramGraph) {
+		// @ts-expect-error
         store.state.RamChart[dp.index].data.push(dp.dp);
     }
     temperatureGraph.length = 0;
@@ -225,19 +231,27 @@ const load = () => {
                 });
         }, 1000);
     }
+	// @ts-expect-error
     store.state.loadAverageChartOne = oneMinute;
+	// @ts-expect-error
     store.state.loadAverageChartFive = fiveMinute;
+	// @ts-expect-error
     store.state.loadAverageChartFifteen = fifteenMinute;
+	// @ts-expect-error
     store.state.TemperatureChart = temperatureInitial;
+	// @ts-expect-error
     store.state.RamChart = ramInitial;
 };
 
 setInterval(() => {
     for (let i = 0; i < store.state.status.length; i++) {
         let element = store.state.status[i];
+		// @ts-expect-error
         if (element.time + 11 < Date.now() / 1000) {
+			// @ts-expect-error
             element.symbol = "⚠";
         } else {
+			// @ts-expect-error
             element.symbol = "";
         }
     }

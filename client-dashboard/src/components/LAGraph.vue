@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import type { PropType } from "vue";
 import {
     generateRange,
     store,
@@ -28,7 +29,7 @@ ChartJS.register(
     LineElement,
     LinearScale,
     PointElement,
-    CategoryScale
+    CategoryScale,
 );
 
 defineProps({
@@ -53,7 +54,8 @@ defineProps({
         default: () => {},
     },
     plugins: {
-        type: Array as PropType<Plugin<"line">[]>,
+		// @ts-expect-error
+        type: Array as PropType<Plugin<'line'>>,
         default: () => [],
     },
 });
@@ -90,6 +92,7 @@ setInterval(() => {
 
     chartData.value = {
         labels: generateRange(length),
+		// @ts-expect-error
         datasets: dataOneMinute,
     };
 }, 10000);
@@ -97,10 +100,12 @@ setInterval(() => {
 setInterval(() => {
     if (
         !!store.state.loadAverageChartOne ||
+		// @ts-expect-error
         !!store.state.loadAverageChartOne[0].data
     ) {
         return;
     }
+	// @ts-expect-error
     for (const d of store.state.loadAverageChartOne) {
         let newOne = [];
         let first = true;
@@ -116,6 +121,7 @@ setInterval(() => {
     for (const d of store.state.loadAverageChartFive) {
         let newOne = [];
         let first = true;
+		// @ts-expect-error
         for (const dp of d.data) {
             if (first) {
                 first = false;
@@ -123,11 +129,13 @@ setInterval(() => {
             }
             newOne.push(dp);
         }
+		// @ts-expect-error
         d.data = newOne;
     }
     for (const d of store.state.loadAverageChartFifteen) {
         let newOne = [];
         let first = true;
+		// @ts-expect-error
         for (const dp of d.data) {
             if (first) {
                 first = false;
@@ -135,6 +143,7 @@ setInterval(() => {
             }
             newOne.push(dp);
         }
+		// @ts-expect-error
         d.data = newOne;
     }
 }, 10000);

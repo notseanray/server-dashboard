@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineComponent, ref } from "vue";
+import { ref } from "vue";
 import {
     store,
     stringToColor,
@@ -49,10 +49,12 @@ defineProps({
         type: String,
     },
     styles: {
+		// @ts-expect-error
         type: Object as PropType<Partial<CSSStyleDeclaration>>,
         default: () => {},
     },
     plugins: {
+		// @ts-expect-error
         type: Array as PropType<Plugin<"line">[]>,
         default: () => [],
     },
@@ -66,16 +68,21 @@ setInterval(() => {
     let length = 0;
     for (const d of store.state.RamChart) {
         if (length == 0) {
+			// @ts-expect-error
             length = d.data.length;
         }
         data.push({
+			// @ts-expect-error
             label: shortenLabel(d.ip) + " ram",
+			// @ts-expect-error
             backgroundColor: stringToColor(d.ip),
+			// @ts-expect-error
             data: d.data,
         });
     }
     chartData.value = {
         labels: generateRange(length),
+		// @ts-expect-error
         datasets: data,
     };
 }, 10000);

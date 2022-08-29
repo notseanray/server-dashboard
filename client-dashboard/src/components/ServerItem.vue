@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @ts-nocheck
 import { defineProps } from "vue";
 import { store } from "../main";
 defineProps({
@@ -20,13 +21,13 @@ defineProps({
     core_count: Number,
 });
 
-const makeMB = (amt: Number): Number => {
+const makeMB = (amt: number): string => {
     // not sure why, but the crate I'm using in the backend spits out a weird value
     // must divide by this much to get the correct value
     return (amt / 1073.75).toFixed(1);
 };
 
-const formatUptime = (uptime: Number): String => {
+const formatUptime = (uptime: number): String => {
     if (uptime > 3600) {
         let hours = Math.floor(uptime / 3600);
         return `${hours} hrs ${((uptime - hours * 3600) / 60).toFixed(0)} min`;
@@ -36,31 +37,33 @@ const formatUptime = (uptime: Number): String => {
     return `${uptime} sec`;
 };
 
-const loadAvgs = (la: Number[]): String => {
+const loadAvgs = (la: number[]): string => {
     return la.join(" ");
 };
 
 const loadStatus = (host_name: String, ip: String, kernel: String): String => {
     for (let i = 0; i < store.state.status.length; i++) {
         let status = store.state.status[i];
+		// @ts-expect-error
         if (status.name == host_name + "|" + ip + "|" + kernel) {
+			// @ts-expect-error
             return status.symbol;
         }
     }
     return "";
 };
 
-const divideStorage = (mb: Number): String => {
+const divideStorage = (mb: number): string => {
     return `${(mb / 1033216000).toFixed(1)} GiB`;
 };
 
-const displayNet = (tx: Number, rx: Number): String => {
+const displayNet = (tx: number, rx: number): string => {
     return `${(tx / 1073741824).toFixed(1)} GiB ↑ ${(rx / 1073741824).toFixed(
         1
     )} GiB ↓`;
 };
 
-const displayPackets = (ptx: Number, prx: Number, uptime: Number): String => {
+const displayPackets = (ptx: number, prx: number, uptime: number): string => {
     return `${(ptx / 1000 / uptime).toFixed(1)}K/s ↑ ${(
         prx /
         1000 /
@@ -81,9 +84,9 @@ const formatCpu = (cpuName: String): String => {
     return newName;
 };
 
-const cpuTemp = (temp: number | null): number => {
+const cpuTemp = (temp: number | null): string => {
     if (!temp) {
-        return 0;
+        return "0";
     }
     return temp.toFixed(1);
 };
@@ -92,7 +95,7 @@ const cpuTemp = (temp: number | null): number => {
 <template>
     <div class="item">
         <h3>
-            name: {{ host_name }}
+            name: {{ this.host_name }}
             <div style="float: right">kernel: {{ this.kernel }}</div>
             <br />
             ip:
@@ -127,7 +130,7 @@ const cpuTemp = (temp: number | null): number => {
             <div class="diskBox">
                 <div
                     v-for="item in this.disks.filter(
-                        (x) =>
+                        (x: any) =>
                             x.total_space > 10332160000 &&
                             !x.mnt_point.includes('docker')
                     )"
@@ -148,7 +151,7 @@ const cpuTemp = (temp: number | null): number => {
             net:
             <div class="diskBox">
                 <div
-                    v-for="item in this.net.filter((x) => x.tx > 10000)"
+                    v-for="item in this.net.filter((x: any) => x.tx > 10000)"
                     :key="item"
                 >
                     <div class="disk">
@@ -158,7 +161,7 @@ const cpuTemp = (temp: number | null): number => {
                         <br />
                         mean packets:
                         <br />
-                        {{ displayPackets(item.ptx, item.prx, this.uptime) }}
+                        {{ displayPackets(item.ptx, item.prx, uptime) }}
                     </div>
                 </div>
             </div>
@@ -209,7 +212,7 @@ h3 {
     color: var(--color-heading);
 }
 .diskBox {
-    max-width: 95%;
+    max-width: 98%;
     margin-top: 4px;
 	display: flex;
 	flex-wrap: wrap;

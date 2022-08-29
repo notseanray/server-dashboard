@@ -3,6 +3,7 @@ import { createStore } from "vuex";
 import axios from "axios";
 import VueAxios from "vue-axios";
 
+// @ts-expect-error
 import App from "./App.vue";
 import router from "./router";
 import createPersistedState from "vuex-persistedstate";
