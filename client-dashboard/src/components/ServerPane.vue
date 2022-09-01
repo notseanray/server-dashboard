@@ -98,51 +98,6 @@ const getList = () => {
     }
 };
 
-const updateRam = () => {
-    if (trigger) {
-        return;
-    }
-    let newRam = [];
-    for (const line of store.state.RamChart) {
-        let newLine: Number[] = [];
-        let first = true;
-        for (const dp of line.data) {
-            if (first) {
-                first = false;
-                continue;
-            }
-            newLine.push(dp);
-        }
-        newRam.push({ ip: line.ip, data: newLine });
-    }
-    store.state.RamChart = newRam;
-};
-
-const updateTemp = () => {
-    if (trigger) {
-        return;
-    }
-    let newTemp = [];
-    for (const line of store.state.TemperatureChart) {
-        let newLine: Number[] = [];
-        let first = true;
-        for (const dp of line.data) {
-            if (first) {
-                first = false;
-                continue;
-            }
-            newLine.push(dp);
-        }
-        newTemp.push({ ip: line.ip, data: newLine });
-    }
-    store.state.TemperatureChart = newTemp;
-};
-
-setInterval(() => {
-    updateRam();
-    updateTemp();
-}, 10000);
-
 setInterval(() => {
     if (trigger) {
         return;

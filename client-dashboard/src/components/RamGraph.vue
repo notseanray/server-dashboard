@@ -86,6 +86,32 @@ setInterval(() => {
         datasets: data,
     };
 }, 10000);
+
+setInterval(() => {
+    if (
+        !!store.state.RamChart ||
+		// @ts-expect-error
+        !!store.state.RamChart[0].data
+    ) {
+        return;
+    }
+    let newRam = [];
+	// @ts-expect-error
+    for (const line of store.state.RamChart) {
+        let newLine: Number[] = [];
+        let first = true;
+        for (const dp of line.data) {
+            if (first) {
+                first = false;
+                continue;
+            }
+            newLine.push(dp);
+        }
+        newRam.push({ ip: line.ip, data: newLine });
+    }
+	// @ts-expect-error
+    store.state.RamChart = newRam;
+}, 10000);
 </script>
 
 <template>
