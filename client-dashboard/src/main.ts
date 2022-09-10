@@ -54,11 +54,11 @@ export const defaultChartOptions = {
 };
 
 export const generateRange = (max: number): number[] => {
-    let range: number[] = [];
+    let arr = Array(max).fill('a');
     for (let i = 0; i < max; i++) {
-        range.push(i);
+        arr[i] = i;
     }
-    return range;
+    return arr;
 };
 
 export const stringToColorWithField = (ip: any, field: number): String => {

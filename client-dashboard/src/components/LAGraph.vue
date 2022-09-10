@@ -65,10 +65,13 @@ let chartData = ref<ChartData<"line">>({
 
 setInterval(() => {
     let dataOneMinute = [];
-    let length = 352;
+    let length = 0;
 	const data = JSON.parse(JSON.stringify(store.state.loadAverageChartOne));
     for (let i = 0; i < data.length; i++) {
 		const d = data[i];
+        if (length == 0) {
+            length = d.data.length;
+        }
         dataOneMinute.push({
             label: shortenLabel(d.ip) + " 1",
             backgroundColor: stringToColorWithField(d.ip, 1),
@@ -95,57 +98,6 @@ setInterval(() => {
 		// @ts-expect-error
         datasets: dataOneMinute,
     };
-}, 10000);
-
-setInterval(() => {
-    if (
-        !!store.state.loadAverageChartOne ||
-		// @ts-expect-error
-        !!store.state.loadAverageChartOne[0].data
-    ) {
-        return;
-    }
-	// @ts-expect-error
-    for (const d of store.state.loadAverageChartOne) {
-        let newOne = [];
-        let first = true;
-        for (const dp of d.data) {
-            if (first) {
-                first = false;
-                continue;
-            }
-            newOne.push(dp);
-        }
-        d.data = newOne;
-    }
-    for (const d of store.state.loadAverageChartFive) {
-        let newOne = [];
-        let first = true;
-		// @ts-expect-error
-        for (const dp of d.data) {
-            if (first) {
-                first = false;
-                continue;
-            }
-            newOne.push(dp);
-        }
-		// @ts-expect-error
-        d.data = newOne;
-    }
-    for (const d of store.state.loadAverageChartFifteen) {
-        let newOne = [];
-        let first = true;
-		// @ts-expect-error
-        for (const dp of d.data) {
-            if (first) {
-                first = false;
-                continue;
-            }
-            newOne.push(dp);
-        }
-		// @ts-expect-error
-        d.data = newOne;
-    }
 }, 10000);
 </script>
 

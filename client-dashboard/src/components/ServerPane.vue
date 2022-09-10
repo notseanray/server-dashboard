@@ -32,7 +32,7 @@ const getList = () => {
         let fiveMinute: any[] = [];
         let fifteenMinute: any[] = [];
         setTimeout(() => {
-            fetch("http://" + ip + "/data")
+            fetch("http://" + ip + "/server")
                 .then((res) => res.json())
                 .then((response: any) => {
                     for (let i = 0; i < response.length; i++) {
@@ -102,26 +102,51 @@ setInterval(() => {
     if (trigger) {
         return;
     }
+    let temperatureChart = JSON.parse(JSON.stringify(store.state.TemperatureChart));
     for (const dp of temperatureGraph) {
-		// @ts-expect-error
-        store.state.TemperatureChart[dp.index].data.push(dp.dp);
+        if (temperatureChart[dp.index].length > 254) {
+            temperatureChart[dp.index].data.shift();
+        }
+        // @ts-expect-error
+        temperatureChart[dp.index].data.push(dp.dp);
     }
+    let la = JSON.parse(JSON.stringify(store.state.loadAverageChartOne));
     for (const dp of updateList) {
-		// @ts-expect-error
-        store.state.loadAverageChartOne[dp.index].data.push(dp.dp);
+        if (la[dp.index].length > 254) {
+            la[dp.index].data.shift();
+        }
+        // @ts-expect-error
+        la[dp.index].data.push(dp.dp);
     }
+    let la5 = JSON.parse(JSON.stringify(store.state.loadAverageChartFive));
     for (const dp of updateList5) {
-		// @ts-expect-error
-        store.state.loadAverageChartFive[dp.index].data.push(dp.dp);
+        if (la5[dp.index].length > 254) {
+            la5[dp.index].data.shift();
+        }
+        // @ts-expect-error
+        la5[dp.index].data.push(dp.dp);
     }
+    let la15 = JSON.parse(JSON.stringify(store.state.loadAverageChartFifteen));
     for (const dp of updateList15) {
-		// @ts-expect-error
-        store.state.loadAverageChartFifteen[dp.index].data.push(dp.dp);
+        if (la15[dp.index].length > 254) {
+            la15[dp.index].data.shift();
+        }
+        // @ts-expect-error
+        la15[dp.index].data.push(dp.dp);
     }
+    let ram = JSON.parse(JSON.stringify(store.state.RamChart));
     for (const dp of ramGraph) {
-		// @ts-expect-error
-        store.state.RamChart[dp.index].data.push(dp.dp);
+        if (ram[dp.index].length > 254) {
+            ram[dp.index].data.shift();
+        }
+        // @ts-expect-error
+        ram[dp.index].data.push(dp.dp);
     }
+    store.state.TemperatureChart = temperatureChart;
+    store.state.loadAverageChartOne = la;
+    store.state.loadAverageChartFive = la5;
+    store.state.loadAverageChartFifteen = la15;
+    store.state.RamChart = ram;
     temperatureGraph.length = 0;
     updateList.length = 0;
     updateList5.length = 0;
@@ -138,7 +163,7 @@ const load = () => {
     for (let ip of store.state.servers) {
         setTimeout(() => {
             axios
-                .get("http://" + ip + "/data_all")
+                .get("http://" + ip + "/server_all")
                 .then((response: { data: any }) => {
                     for (let i = 0; i < response.data.length; i++) {
                         let r = response.data[i];
@@ -186,27 +211,27 @@ const load = () => {
                 });
         }, 1000);
     }
-	// @ts-expect-error
+    // @ts-expect-error
     store.state.loadAverageChartOne = oneMinute;
-	// @ts-expect-error
+    // @ts-expect-error
     store.state.loadAverageChartFive = fiveMinute;
-	// @ts-expect-error
+    // @ts-expect-error
     store.state.loadAverageChartFifteen = fifteenMinute;
-	// @ts-expect-error
+    // @ts-expect-error
     store.state.TemperatureChart = temperatureInitial;
-	// @ts-expect-error
+    // @ts-expect-error
     store.state.RamChart = ramInitial;
 };
 
 setInterval(() => {
     for (let i = 0; i < store.state.status.length; i++) {
         let element = store.state.status[i];
-		// @ts-expect-error
+        // @ts-expect-error
         if (element.time + 11 < Date.now() / 1000) {
-			// @ts-expect-error
+            // @ts-expect-error
             element.symbol = "⚠";
         } else {
-			// @ts-expect-error
+            // @ts-expect-error
             element.symbol = "";
         }
     }

@@ -102,6 +102,7 @@ setInterval(() => {
         let first = true;
         for (const dp of line.data) {
             if (first) {
+                console.log("skipped")
                 first = false;
                 continue;
             }
