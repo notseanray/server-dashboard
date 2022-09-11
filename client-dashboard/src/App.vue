@@ -19,6 +19,7 @@ const removeRelay = (ip: string) => {
     store.state.servers = newData;
     localStorage.setItem("relays", store.state.servers.join("|"));
 };
+let message = "";
 </script>
 
 <template>
@@ -35,10 +36,10 @@ const removeRelay = (ip: string) => {
                 <br />
                 <input
                     class="addButton"
-                    v-model="this.message"
+                    v-model="message"
                     placeholder="127.0.0.1:0000"
                 />
-                <button class="addButton" @click="addServer(this.message)">
+                <button class="addButton" @click="addServer(message)">
                     add relay
                 </button>
                 <br />
@@ -69,6 +70,22 @@ const removeRelay = (ip: string) => {
 
 <style>
 @import "@/assets/base.css";
+
+::-webkit-scrollbar {
+    width: 5px;
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar-button:single-button {
+    height: 0px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgb(66, 66, 94);
+}
+::-webkit-scrollbar-track {
+    background: rgb(23, 27, 29);
+}
 
 #app {
     width: 100%;

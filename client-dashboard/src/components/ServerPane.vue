@@ -3,6 +3,7 @@
 import ServerItem from "./ServerItem.vue";
 import { store } from "../main";
 import { inject } from "vue";
+import { DiskInterface, NetInterface } from "./ServerPane.vue";
 const axios: any = inject("axios"); // inject axios
 let first = true;
 let trigger = true;
@@ -99,12 +100,13 @@ const getList = () => {
 };
 
 setInterval(() => {
+    const max_length = 353;
     if (trigger) {
         return;
     }
     let temperatureChart = JSON.parse(JSON.stringify(store.state.TemperatureChart));
     for (const dp of temperatureGraph) {
-        if (temperatureChart[dp.index].length > 254) {
+        if (temperatureChart[dp.index].data.length >= max_length) {
             temperatureChart[dp.index].data.shift();
         }
         // @ts-expect-error
@@ -112,7 +114,7 @@ setInterval(() => {
     }
     let la = JSON.parse(JSON.stringify(store.state.loadAverageChartOne));
     for (const dp of updateList) {
-        if (la[dp.index].length > 254) {
+        if (la[dp.index].data.length >= max_length) {
             la[dp.index].data.shift();
         }
         // @ts-expect-error
@@ -120,7 +122,7 @@ setInterval(() => {
     }
     let la5 = JSON.parse(JSON.stringify(store.state.loadAverageChartFive));
     for (const dp of updateList5) {
-        if (la5[dp.index].length > 254) {
+        if (la5[dp.index].data.length >= max_length) {
             la5[dp.index].data.shift();
         }
         // @ts-expect-error
@@ -128,7 +130,7 @@ setInterval(() => {
     }
     let la15 = JSON.parse(JSON.stringify(store.state.loadAverageChartFifteen));
     for (const dp of updateList15) {
-        if (la15[dp.index].length > 254) {
+        if (la15[dp.index].data.length >= max_length) {
             la15[dp.index].data.shift();
         }
         // @ts-expect-error
@@ -136,7 +138,7 @@ setInterval(() => {
     }
     let ram = JSON.parse(JSON.stringify(store.state.RamChart));
     for (const dp of ramGraph) {
-        if (ram[dp.index].length > 254) {
+        if (ram[dp.index].data.length >= max_length) {
             ram[dp.index].data.shift();
         }
         // @ts-expect-error
@@ -241,11 +243,30 @@ setInterval(() => {
     }
     getList();
 }, 10000);
+
+interface ServerItemProps {
+    ip: string;
+    host_name: string;
+    timestamp: string;
+    name: string;
+    kernel: string;
+    memory_used: number;
+    memory_total: number;
+    swap_used: number;
+    swap_total: number;
+    uptime: number;
+    disks: Array<DiskInterface>;
+    net: Array<NetInterface>;
+    cpu: string;
+    core_count: number;
+    load_avg: Array<number>;
+    cpu_temp: number;
+}
 </script>
 
 <template>
     <div class="serverBox">
-        <div v-for="item in store.state.items" :key="item">
+        <div v-for="item in store.state.items as ServerItemProps" :key="item">
             <ServerItem
                 :ip="item.ip"
                 :host_name="item.host_name"

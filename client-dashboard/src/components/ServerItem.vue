@@ -21,9 +21,25 @@ defineProps({
     core_count: Number,
 });
 
+export interface DiskInterface {
+    name: string;
+    removable: boolean;
+    mnt_point: string;
+    used_space: number;
+    total_space: number;
+}
+
+export interface NetInterface {
+    if_name: string;
+    tx: number;
+    rx: number;
+    ptx: number;
+    prx: number;
+}
+
 const makeMB = (amt: number): string => {
     // not sure why, but the crate I'm using in the backend spits out a weird value
-    // must divide by this much to get the correct value
+    // must divide by much to get the correct value
     return (amt / 1073.75).toFixed(1);
 };
 
@@ -95,45 +111,45 @@ const cpuTemp = (temp: number | null): string => {
 <template>
     <div class="item">
         <h3>
-            name: {{ this.host_name }}
-            <div style="float: right">kernel: {{ this.kernel }}</div>
+            name: {{ host_name }}
+            <div style="float: right">kernel: {{ kernel }}</div>
             <br />
             ip:
-            <div style="float: right">{{ this.ip }}</div>
+            <div style="float: right">{{ ip }}</div>
             <br />
             cpu:
             <div style="float: right">
-                {{ formatCpu(this.cpu) }} ({{ this.core_count }})
+                {{ formatCpu(cpu) }} ({{ core_count }})
             </div>
             <br />
-            load avg: {{ loadAvgs(this.load_avg) }}
+            load avg: {{ loadAvgs(load_avg) }}
             <div style="float: right">
-                cpu temp: {{ cpuTemp(this.cpu_temp) }} °C
+                cpu temp: {{ cpuTemp(cpu_temp) }} °C
             </div>
             <br />
             ram:
             <div style="float: right">
-                {{ makeMB(this.memory_used) }} MiB /
-                {{ makeMB(this.memory_total) }} MiB
+                {{ makeMB(memory_used) }} MiB /
+                {{ makeMB(memory_total) }} MiB
             </div>
             <br />
             swap:
             <div style="float: right">
-                {{ makeMB(this.swap_used) }} MiB /
-                {{ makeMB(this.swap_total) }} MiB
+                {{ makeMB(swap_used) }} MiB /
+                {{ makeMB(swap_total) }} MiB
             </div>
             <br />
-            uptime: {{ loadStatus(this.host_name, this.ip, this.kernel) }}
-            <div style="float: right">{{ formatUptime(this.uptime) }}</div>
+            uptime: {{ loadStatus(host_name, ip, kernel) }}
+            <div style="float: right">{{ formatUptime(uptime) }}</div>
             <br />
             disks:
             <div class="diskBox">
                 <div
-                    v-for="item in this.disks.filter(
+                    v-for="item in disks.filter(
                         (x: any) =>
                             x.total_space > 10332160000 &&
                             !x.mnt_point.includes('docker')
-                    )"
+                    ) as Array<DiskInterface>"
                     :key="item"
                 >
                     <div class="disk">
@@ -151,8 +167,8 @@ const cpuTemp = (temp: number | null): string => {
             net:
             <div class="diskBox">
                 <div
-                    v-for="item in this.net.filter((x: any) => x.tx > 10000)"
-                    :key="item"
+                    v-for="item in net.filter((x: any) => x.tx > 10000) as Array<NetInterface>"
+                    :key="item as any"
                 >
                     <div class="disk">
                         {{ item.if_name }}
