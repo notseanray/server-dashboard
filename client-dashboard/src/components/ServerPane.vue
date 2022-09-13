@@ -3,7 +3,6 @@
 import ServerItem from "./ServerItem.vue";
 import { store } from "../main";
 import { inject } from "vue";
-import { DiskInterface, NetInterface } from "./ServerPane.vue";
 const axios: any = inject("axios"); // inject axios
 let first = true;
 let trigger = true;
@@ -13,6 +12,22 @@ let updateList5: { index: number; dp: number }[] = [];
 let updateList15: { index: number; dp: number }[] = [];
 let temperatureGraph: { index: number; dp: number }[] = [];
 let ramGraph: { index: number; dp: number }[] = [];
+interface DiskInterface {
+    name: string;
+    fs_type: string;
+    removable: boolean;
+    mnt_point: string;
+    used_space: number;
+    total_space: number;
+}
+
+interface NetInterface {
+    if_name: string;
+    tx: number;
+    rx: number;
+    ptx: number;
+    prx: number;
+}
 
 function find(ip: String) {
     for (let i = 0; i < ipMap.length; i++) {
@@ -33,7 +48,7 @@ const getList = () => {
         let fiveMinute: any[] = [];
         let fifteenMinute: any[] = [];
         setTimeout(() => {
-            fetch("http://" + ip + "/server")
+            fetch("https://" + ip + "/server")
                 .then((res) => res.json())
                 .then((response: any) => {
                     for (let i = 0; i < response.length; i++) {
@@ -165,7 +180,7 @@ const load = () => {
     for (let ip of store.state.servers) {
         setTimeout(() => {
             axios
-                .get("http://" + ip + "/server_all")
+                .get("https://" + ip + "/server_all")
                 .then((response: { data: any }) => {
                     for (let i = 0; i < response.data.length; i++) {
                         let r = response.data[i];

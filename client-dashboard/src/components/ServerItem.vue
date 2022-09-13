@@ -1,4 +1,20 @@
 <script setup lang="ts">
+export interface DiskInterface {
+    name: string;
+    fs_type: string;
+    removable: boolean;
+    mnt_point: string;
+    used_space: number;
+    total_space: number;
+}
+
+export interface NetInterface {
+    if_name: string;
+    tx: number;
+    rx: number;
+    ptx: number;
+    prx: number;
+}
 // @ts-nocheck
 import { defineProps } from "vue";
 import { store } from "../main";
@@ -21,21 +37,6 @@ defineProps({
     core_count: Number,
 });
 
-export interface DiskInterface {
-    name: string;
-    removable: boolean;
-    mnt_point: string;
-    used_space: number;
-    total_space: number;
-}
-
-export interface NetInterface {
-    if_name: string;
-    tx: number;
-    rx: number;
-    ptx: number;
-    prx: number;
-}
 
 const makeMB = (amt: number): string => {
     // not sure why, but the crate I'm using in the backend spits out a weird value
@@ -150,7 +151,7 @@ const cpuTemp = (temp: number | null): string => {
                             x.total_space > 10332160000 &&
                             !x.mnt_point.includes('docker')
                     ) as Array<DiskInterface>"
-                    :key="item"
+                    :key="item.name"
                 >
                     <div class="disk">
                         {{ item.name.slice(0, item.name.length > 15 ? 15 : item.name.length) }} [{{ item.fs_type }}]
@@ -168,7 +169,7 @@ const cpuTemp = (temp: number | null): string => {
             <div class="diskBox">
                 <div
                     v-for="item in net.filter((x: any) => x.tx > 10000) as Array<NetInterface>"
-                    :key="item as any"
+                    :key="item.if_name"
                 >
                     <div class="disk">
                         {{ item.if_name }}
